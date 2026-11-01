@@ -257,7 +257,7 @@ if number < len(quiz):
         key=f"{level}_{number}"
     )
 
-    if st.button("Check Answer", disabled=st.session_state.answered):
+   if st.button("Check Answer", disabled=st.session_state.answered, key="check_answer_button"):
         st.session_state.answered = True
         if answer == q["correct"]:
             st.session_state.score += 1
