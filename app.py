@@ -1,12 +1,6 @@
 
 import streamlit as st
 from supabase import create_client
-
-   st.set_page_config(
-    page_title="Amateur Radio License Practice",
-    page_icon="📻",
-    layout="centered"
-)
 st.title("📻 Worldwide Radio Ham Study Bot")
 st.caption("Learn, practice, and prepare for your amateur radio license.")
 
