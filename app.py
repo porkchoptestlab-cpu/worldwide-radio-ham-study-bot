@@ -246,8 +246,26 @@ number = st.session_state.question_number
 
 if number < len(quiz):
     q = quiz[number]
-
     st.progress((number + 1) / len(quiz))
+    st.write(f"Question {number + 1} of {len(quiz)}")
+    st.subheader(q["question"])
+
+    answer = st.radio(
+        "Select your answer:",
+        q["answers"],
+        key=f"{level}_{number}"
+    )
+
+    if st.button(
+        "Check Answer",
+        disabled=st.session_state.answered,
+        key=f"check_answer_button_{level}_{number}"
+    ):
+        st.session_state.answered = True
+        if answer == q["correct"]:
+            st.session_state.score += 1
+
+    if st.session_state.answered:
     st.write(f"Question {number + 1} of {len(quiz)}")
     st.subheader(q["question"])
 
