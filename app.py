@@ -244,10 +244,11 @@ if st.session_state.get("selected_level") != level:
 quiz = questions[level]
 number = st.session_state.question_number
 
-    if number < len(quiz):     q = quiz[number]      st.progress((number + 1) / len(quiz))     st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")     q = quiz[number]      st.progress((number + 1) / len(quiz))     st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")     q = quiz[number]      st.progress((number + 1) / len(quiz))     st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")     q = quiz[number]      st.progress((number + 1) / len(quiz))     st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")
+if number < len(quiz):
     q = quiz[number]
-    st.   st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")progress((number + 1) / len(quiz))
-     
+
+    st.progress((number + 1) / len(quiz))
+    st.write(f"Question {number + 1} of {len(quiz)}")
     st.subheader(q["question"])
 
     answer = st.radio(
@@ -266,23 +267,17 @@ number = st.session_state.question_number
             st.session_state.score += 1
 
     if st.session_state.answered:
-        st.write(f"Question {number + 1} of {len(quiz)}")     st.subheader(q["question"])      answer = st.radio(         "Select your answer:",         q["answers"],         key=f"{level}_{number}"     )      if st.button(         "Check Answer",         disabled=st.session_state.answered,         key=f"check_answer_button_{level}_{number}"     ):         st.session_state.answered = True         if answer == q["correct"]:             st.session_state.score += 1      if st.session_state.answered:         st.write("Answer checked!")
-    st.subheader(q["question"])
-
-    answer = st.radio(
-        "Select your answer:",
-        q["answers"],
-        key=f"{level}_{number}"
-    )
-
-  if st.button("Check Answer", disabled=st.session_state.answered, key="check_answer_button"):
-        st.session_state.answered = True
-        if answer == q["correct"]:
-            st.session_state.score += 1
-
-    if st.session_state.answered:
         if answer == q["correct"]:
             st.success("Correct!")
+        else:
+            st.error("Not quite. Try the next question.")
+        st.write(f"Score: {st.session_state.score}")
+
+else:
+    st.success("You finished this study session!")
+    st.write(f"Final score: {st.session_state.score} out of {len(quiz)}")
+
+  
         else:
             st.error("Not quite. The correct answer is: " + q["correct"])
 
