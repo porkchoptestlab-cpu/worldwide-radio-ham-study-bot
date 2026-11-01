@@ -8,9 +8,6 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("📻 Worldwide Radio Ham Study Bot")
-st.caption("Learn, practice, and prepare for your amateur radio license.")
-
 @st.cache_resource
 def get_database():
     return create_client(
