@@ -6,7 +6,6 @@ st.set_page_config(
     page_title="Worldwide Radio Ham Study Bot",
     page_icon="📻",
     layout="centered"
-
 st.title("📻 Worldwide Radio Ham Study Bot")
 st.caption("Learn, practice, and prepare for your amateur radio license.")
 )
