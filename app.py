@@ -70,7 +70,7 @@ if page == "Study":
 # Admin page
 elif page == "Admin":
     st.header("🔐 Admin — Add Questions")
-    password = st.text_input("Admin password", type="password")
+    password = st.text_input("Admin password", type="Rr4v$2$l5")
     
 uploaded_csv = st.file_uploader(
     "Upload a question CSV file",
