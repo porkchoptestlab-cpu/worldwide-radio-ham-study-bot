@@ -1,7 +1,10 @@
 
 import streamlit as st
-import uuid
+import hashlib
 from supabase import create_client
+
+st.set_page_config(page_title="Worldwide Radio Ham Study Bot", page_icon="📻")
+
 st.title("📻 Worldwide Radio Ham Study Bot")
 st.caption("Learn, practice, and prepare for your amateur radio license.")
 
@@ -11,9 +14,30 @@ def get_database():
         st.secrets["SUPABASE_URL"],
         st.secrets["SUPABASE_KEY"]
     )
-supabase = get_database()
 
-# Display top 10 students
+try:
+    supabase = get_database()
+except Exception:
+    st.error("Database connection failed. Check your Streamlit Secrets.")
+    st.stop()
+
+levels = ["Technician", "General", "Amateur Extra"]
+
+# Student name and persistent scoreboard identity
+st.sidebar.title("🏆 Student Scoreboard")
+player_name = st.sidebar.text_input("Enter your name")
+
+player_id = None
+if player_name.strip():
+    normalized_name = player_name.strip().lower()
+    player_id = hashlib.sha256(normalized_name.encode()).hexdigest()
+    st.sidebar.success(f"Welcome, {player_name.strip()}!")
+else:
+    st.sidebar.info("Enter your name to take a test.")
+
+# Public Top 10 leaderboard
+st.sidebar.subheader("🏆 Top 10 Students")
+
 try:
     leaderboard = (
         supabase.table("leaderboard")
@@ -23,26 +47,28 @@ try:
         .execute()
     )
 
-    st.sidebar.subheader("🏆 Top 10 Students")
-
-    for i, student in enumerate(leaderboard.data, 1):
-        st.sidebar.write(
-            f"{i}. {student['display_name']} — {student['score']} points"
-        )
-
-except Exception as e:
-    st.sidebar.warning("Scoreboard is loading.")
-try:
-    db = get_database()
+    if leaderboard.data:
+        for i, student in enumerate(leaderboard.data, 1):
+            st.sidebar.write(
+                f"{i}. {student['display_name']} — {student['score']} points"
+            )
+    else:
+        st.sidebar.write("No scores yet. Be the first!")
 except Exception:
-    st.error("Database connection failed. Check your Streamlit Secrets.")
-    st.stop()
+    st.sidebar.warning("Could not load scoreboard.")
 
-page = st.sidebar.radio("Menu", ["Study", "Admin"])
+page = st.sidebar.radio("Menu", ["Study", "Practice Test", "Admin"])
 
-levels = ["Technician", "General", "Amateur Extra"]
+# Study page
+if page == "Study":
+    st.header("📚 Study")
+    st.write("Choose Practice Test to begin studying.")
+    st.write("Available license levels:")
+    for level_name in levels:
+        st.write(f"• {level_name}")
 
-if page == "Admin":
+# Admin page
+elif page == "Admin":
     st.header("🔐 Admin — Add Questions")
 
     password = st.text_input("Admin password", type="password")
@@ -75,7 +101,7 @@ if page == "Admin":
                     st.error("Please fill in the question and all four answers.")
                 else:
                     try:
-                        db.table("questions").insert({
+                        supabase.table("questions").insert({
                             "level": level,
                             "question": question.strip(),
                             "answers": answers,
@@ -87,19 +113,20 @@ if page == "Admin":
 
                         st.success("Question saved permanently!")
                     except Exception:
-                        st.error("Could not save the question. Check your database settings.")
+                        st.error("Could not save question. Check database permissions.")
 
     elif password:
         st.error("Incorrect Admin password.")
 
+# Practice Test page
 else:
-    st.header("📚 Practice Test")
+    st.header("📝 Practice Test")
 
     level = st.selectbox("Choose your license level", levels)
 
     try:
         questions = (
-            db.table("questions")
+            supabase.table("questions")
             .select("*")
             .eq("level", level)
             .order("id")
@@ -112,199 +139,109 @@ else:
 
     if not questions:
         st.info("No questions have been added for this level yet.")
-        st.write("The Admin can add questions using the Admin menu.")
     else:
         if st.session_state.get("active_level") != level:
             st.session_state.active_level = level
             st.session_state.question_number = 0
             st.session_state.score = 0
             st.session_state.answered = False
+            st.session_state.completion_saved = False
 
-        number = st.session_state.get("question_number", 0)
+        if "question_number" not in st.session_state:
+            st.session_state.question_number = 0
+            st.session_state.score = 0
+            st.session_state.answered = False
+            st.session_state.completion_saved = False
+
+        number = st.session_state.question_number
 
         if number >= len(questions):
             st.success("Practice test complete!")
+
             st.subheader(
                 f"Your score: {st.session_state.score} / {len(questions)}"
             )
+
+            # Save the student's best score permanently
+            if player_id and not st.session_state.completion_saved:
+                try:
+                    existing = (
+                        supabase.table("leaderboard")
+                        .select("score")
+                        .eq("player_id", player_id)
+                        .execute()
+                    )
+
+                    old_score = (
+                        existing.data[0]["score"]
+                        if existing.data else 0
+                    )
+
+                    best_score = max(old_score, st.session_state.score)
+
+                    supabase.table("leaderboard").upsert({
+                        "player_id": player_id,
+                        "display_name": player_name.strip(),
+                        "score": best_score
+                    }, on_conflict="player_id").execute()
+
+                    st.session_state.completion_saved = True
+                    st.success("Your score has been saved to the leaderboard!")
+
+                except Exception:
+                    st.error("Your score could not be saved. Check leaderboard permissions.")
+            elif not player_id:
+                st.warning("Enter your name in the sidebar to save your score.")
 
             if st.button("Start Again"):
                 st.session_state.question_number = 0
                 st.session_state.score = 0
                 st.session_state.answered = False
+                st.session_state.completion_saved = False
                 st.rerun()
 
         else:
             q = questions[number]
 
             st.progress((number + 1) / len(questions))
-        
-           
+            st.write(f"Question {number + 1} of {len(questions)}")
+            st.subheader(q["question"])
 
+            answer = st.radio(
+                "Choose your answer:",
+                q["answers"],
+                key=f"answer_{level}_{number}"
+            )
 
             if st.button(
                 "Check Answer",
                 disabled=st.session_state.answered,
                 key=f"check_{level}_{number}"
             ):
-                st.session_state.answered = True
-
-                if answer == q["correct_answer"]:
-                    st.session_state.score += 1
-                    st.success("Correct!")
+                if not player_id:
+                    st.error("Please enter your name in the sidebar first.")
                 else:
-                    st.error("Incorrect. Correct answer: " + q["correct_answer"])
+                    st.session_state.answered = True
+
+                    if answer == q["correct_answer"]:
+                        st.session_state.score += 1
 
             if st.session_state.answered:
-                if q.get("explanation"):     st.info(q["explanation"])
+                if answer == q["correct_answer"]:
+                    st.success("Correct!")
+                else:
+                    st.error(
+                        "Incorrect. Correct answer: " + q["correct_answer"]
+                    )
+
+                if q.get("explanation"):
+                    st.info(q["explanation"])
 
                 if st.button("Next Question", key=f"next_{level}_{number}"):
                     st.session_state.question_number += 1
                     st.session_state.answered = False
                     st.rerun()
 
-       
-               
-            
 st.divider()
 st.caption("Worldwide Radio Ham Study Bot")
-
-import streamlit as st
-
-
-
-
-
-
-
-
-questions = {
-    "Technician": [
-        {
-            "question": "What does CQ mean?",
-            "answers": [
-                "Calling any station",
-                "Emergency only",
-                "Goodbye"
-            ],
-            "correct": "Calling any station",
-            "explanation": "CQ is a general call to any amateur radio station."
-        },
-        {
-            "question": "What organization regulates amateur radio in the United States?",
-            "answers": ["FCC", "NASA", "FEMA"],
-            "correct": "FCC",
-            "explanation": "The Federal Communications Commission regulates amateur radio."
-        }
-    ],
-    "General": [
-        {
-            "question": "What is the purpose of an antenna?",
-            "answers": [
-                "Transmit and receive radio waves",
-                "Store electricity",
-                "Measure temperature"
-            ],
-            "correct": "Transmit and receive radio waves",
-            "explanation": "An antenna converts electrical signals into radio waves and vice versa."
-        }
-    ],
-    "Amateur Extra": [
-        {
-            "question": "What does impedance matching help maximize?",
-            "answers": [
-                "Power transfer",
-                "Battery size",
-                "Audio volume"
-            ],
-            "correct": "Power transfer",
-            "explanation": "Impedance matching helps transfer power efficiently."
-        }
-    ]
-}
-
-if "question_number" not in st.session_state:
-    st.session_state.question_number = 0
-
-if "score" not in st.session_state:
-    st.session_state.score = 0
-
-if "answered" not in st.session_state:
-    st.session_state.answered = False
-
-if st.session_state.get("selected_level") != level:
-    st.session_state.selected_level = level
-    st.session_state.question_number = 0
-    st.session_state.score = 0
-    st.session_state.answered = False
-st.sidebar.title("🏆 Student Scoreboard")
-
-player_name = st.sidebar.text_input("Enter your name")
-
-if "player_id" not in st.session_state:
-    st.session_state.player_id = str(uuid.uuid4())
-
-if player_name.strip():
-    st.sidebar.success(f"Welcome, {player_name}!")
-else:
-    st.sidebar.info("Enter your name to start.")
-
-quiz = questions[level]
-number = st.session_state.question_number
-
-st.sidebar.subheader("🏆 Top 10 Students")
-
-try:
-    result = (
-        supabase.table("leaderboard")
-        .select("display_name, score")
-        .order("score", desc=True)
-        .limit(10)
-        .execute()
-    )
-
-    for i, student in enumerate(result.data, 1):
-        st.sidebar.write(
-            f"{i}. {student['display_name']} — {student['score']} points"
-        )
-except Exception as e:
-    st.sidebar.warning("Could not load scoreboard.")
-
-if number >= len(quiz):
-    st.success("Practice test complete!")
-    st.write(f"Your score: {st.session_state.score} / {len(quiz)}")
-
-else:
-    q = quiz[number]
-
-    st.progress((number + 1) / len(quiz))
-    st.write(f"Question {number + 1} of {len(quiz)}")
-    st.subheader(q["question"])
-
-               
-        q["answers"],
-        key=f"answer_{level}_{number}"
-
-
-    if st.button("Check Answer", key=f"check_{level}_{number}"):
-        if not player_name.strip():
-            st.error("Please enter your name in the sidebar.")
-        elif not st.session_state.answered:
-            st.session_state.answered = True
-
-            if answer == q["correct"]:
-                st.session_state.score += 1
-                st.success("Correct!")
-            else:
-                st.error("Incorrect. Correct answer: " + q["correct"])
-
-    if st.session_state.answered:
-        if q.get("explanation"):
-            st.info(q["explanation"])
-
-        if st.button("Next Question", key=f"next_{level}_{number}"):
-            st.session_state.question_number += 1
-            st.session_state.answered = False
-            st.rerun()
-
-
+st.caption("Created by Porkchop")
