@@ -283,7 +283,7 @@ else:
                
         q["answers"],
         key=f"answer_{level}_{number}"
-    )
+
 
     if st.button("Check Answer", key=f"check_{level}_{number}"):
         if not player_name.strip():
