@@ -11,7 +11,27 @@ def get_database():
         st.secrets["SUPABASE_URL"],
         st.secrets["SUPABASE_KEY"]
     )
+supabase = get_database()
 
+# Display top 10 students
+try:
+    leaderboard = (
+        supabase.table("leaderboard")
+        .select("display_name, score")
+        .order("score", desc=True)
+        .limit(10)
+        .execute()
+    )
+
+    st.sidebar.subheader("🏆 Top 10 Students")
+
+    for i, student in enumerate(leaderboard.data, 1):
+        st.sidebar.write(
+            f"{i}. {student['display_name']} — {student['score']} points"
+        )
+
+except Exception as e:
+    st.sidebar.warning("Scoreboard is loading.")
 try:
     db = get_database()
 except Exception:
@@ -149,7 +169,7 @@ else:
 
                 st.info(q.get("explanation") or "Keep studying!")
 
-                if st.button("Next Question"):
+                             if st.button(                 "Check Answer",                 disabled=st.session_state.get("answered", False),                 key=f"check_{level}_{q['id']}"             ):                 st.session_state.answered = True                  if answer == q["correct_answer"]:                     st.session_state.score += 1                      # Save the student's point in Supabase                     if player_name.strip():                         supabase.table("leaderboard").upsert({                             "player_id": st.session_state.player_id,                             "display_name": player_name.strip(),                             "score": st.session_state.score                         }, on_conflict="player_id").execute()                      st.success("Correct! You earned 1 point.")                 else:                     st.error(                         "Not quite. The correct answer is: "                         + q["correct_answer"]                     )                  st.info(q.get("explanation", ""))"Next Question"):
                     st.session_state.question_number += 1
                     st.session_state.answered = False
                     st.rerun()
