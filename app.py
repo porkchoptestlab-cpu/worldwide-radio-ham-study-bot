@@ -141,13 +141,34 @@ else:
             st.write(f"Question {number + 1} of {len(questions)}")
             st.subheader(q["question"])
 
-        File "/mount/src/worldwide-radio-ham-study-bot/app.py", line 144
-              answer = st.radio(
-                               ^
-SyntaxError: '(' was never closed
+            answer = st.radio(
                 "Choose your answer:",
-                
-         
+                q["answers"],
+                key=f"answer_{level}_{number}"
+            )
+
+            if st.button(
+                "Check Answer",
+                disabled=st.session_state.answered,
+                key=f"check_{level}_{number}"
+            ):
+                st.session_state.answered = True
+
+                if answer == q["correct"]:
+                    st.session_state.score += 1
+                    st.success("Correct!")
+                else:
+                    st.error("Incorrect. Correct answer: " + q["correct"])
+
+            if st.session_state.answered:
+                st.info(q.get("explanation", "Keep studying!"))
+
+                if st.button("Next Question", key=f"next_{level}_{number}"):
+                    st.session_state.question_number += 1
+                    st.session_state.answered = False
+                    st.rerun()
+
+       
                
             
 st.divider()
