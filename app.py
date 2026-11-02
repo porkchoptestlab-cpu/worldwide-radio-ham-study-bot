@@ -1,9 +1,4 @@
-```python
-import streamlit as st
-import hashlib
-import pandas as pd
-import re
-from supabase import create_client
+
 
 st.set_page_config(
     page_title="Worldwide Radio Ham Study Bot",
