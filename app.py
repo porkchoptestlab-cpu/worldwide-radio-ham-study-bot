@@ -139,13 +139,8 @@ else:
 
             st.progress((number + 1) / len(questions))
             st.write(f"Question {number + 1} of {len(questions)}")
-            st.subheader(q["question"])
-
-                               
-               
-                key=f"answer_{level}_{number}"
-            )
-
+            st.subheader(q["question"]) 
+                        answer = st.radio("Choose your answer:", q["answers"], key=f"answer_{level}_{number}"
             if st.button(
                 "Check Answer",
                 disabled=st.session_state.answered,
