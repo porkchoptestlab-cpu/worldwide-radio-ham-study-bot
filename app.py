@@ -161,7 +161,7 @@ else:
                     st.error("Incorrect. Correct answer: " + q["correct_answer"])
 
             if st.session_state.answered:
-                st.info(q.get("explanation", "Keep studying!"))
+                if q.get("explanation"):     st.info(q["explanation"])
 
                 if st.button("Next Question", key=f"next_{level}_{number}"):
                     st.session_state.question_number += 1
