@@ -158,7 +158,7 @@ else:
                     st.session_state.score += 1
                     st.success("Correct!")
                 else:
-                    st.error("Incorrect. Correct answer: " + q["correct"])
+                    st.error("Incorrect. Correct answer: " + q["correct_answer"])
 
             if st.session_state.answered:
                 st.info(q.get("explanation", "Keep studying!"))
