@@ -70,6 +70,55 @@ if page == "Study":
 # Admin page
 elif page == "Admin":
     st.header("🔐 Admin — Add Questions")
+    password = st.text_input("Admin password", type="password")
+    
+uploaded_csv = st.file_uploader(
+    "Upload a question CSV file",
+    type=["csv"]
+)
+
+if uploaded_csv is not None:
+    if st.button("Import CSV Questions"):
+        import pandas as pd
+        import json
+
+        try:
+            df = pd.read_csv(uploaded_csv)
+
+            required_columns = [
+                "level",
+                "question",
+                "answers",
+                "correct_answer",
+                "explanation"
+            ]
+
+            if not all(col in df.columns for col in required_columns):
+                st.error("CSV columns do not match the required format.")
+            else:
+                records = []
+
+                for _, row in df.iterrows():
+                    answers = row["answers"]
+
+                    if isinstance(answers, str):
+                        answers = json.loads(answers)
+
+                    records.append({
+                        "level": str(row["level"]),
+                        "question": str(row["question"]),
+                        "answers": answers,
+                        "correct_answer": str(row["correct_answer"]),
+                        "explanation": str(row["explanation"])
+                    })
+
+                supabase.table("questions").insert(records).execute()
+                st.success(f"Imported {len(records)} questions!")
+                st.rerun()
+
+        except Exception as e:
+            st.error(f"Import failed: {e}")
+
 
     password = st.text_input("Admin password", type="password")
 
