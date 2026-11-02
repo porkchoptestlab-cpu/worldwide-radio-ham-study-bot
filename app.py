@@ -1,5 +1,6 @@
 
 import streamlit as st
+import uuid
 from supabase import create_client
 st.title("📻 Worldwide Radio Ham Study Bot")
 st.caption("Learn, practice, and prepare for your amateur radio license.")
