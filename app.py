@@ -164,8 +164,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("📻 Worldwide Radio Ham Study Bot")
-st.subheader("Amateur Radio License Practice")
+
 
 st.write("Welcome! Choose your license class and test your knowledge.")
 
