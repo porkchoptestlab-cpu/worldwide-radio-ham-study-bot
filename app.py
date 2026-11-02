@@ -142,7 +142,7 @@ else:
             st.subheader(q["question"])
 
                                
-                q["answers"],
+               
                 key=f"answer_{level}_{number}"
             )
 
