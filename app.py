@@ -253,6 +253,64 @@ if player_name.strip():
     st.sidebar.success(f"Welcome, {player_name}!")
 else:
     st.sidebar.info("Enter your name to start.")
+
 quiz = questions[level]
 number = st.session_state.question_number
+
+st.sidebar.subheader("🏆 Top 10 Students")
+
+try:
+    result = (
+        supabase.table("leaderboard")
+        .select("display_name, score")
+        .order("score", desc=True)
+        .limit(10)
+        .execute()
+    )
+
+    for i, student in enumerate(result.data, 1):
+        st.sidebar.write(
+            f"{i}. {student['display_name']} — {student['score']} points"
+        )
+except Exception as e:
+    st.sidebar.warning("Could not load scoreboard.")
+
+if number >= len(quiz):
+    st.success("Practice test complete!")
+    st.write(f"Your score: {st.session_state.score} / {len(quiz)}")
+
+else:
+    q = quiz[number]
+
+    st.progress((number + 1) / len(quiz))
+    st.write(f"Question {number + 1} of {len(quiz)}")
+    st.subheader(q["question"])
+
+    answer = st.radio(
+        "Choose your answer:",
+        q["answers"],
+        key=f"answer_{level}_{number}"
+    )
+
+    if st.button("Check Answer", key=f"check_{level}_{number}"):
+        if not player_name.strip():
+            st.error("Please enter your name in the sidebar.")
+        elif not st.session_state.answered:
+            st.session_state.answered = True
+
+            if answer == q["correct"]:
+                st.session_state.score += 1
+                st.success("Correct!")
+            else:
+                st.error("Incorrect. Correct answer: " + q["correct"])
+
+    if st.session_state.answered:
+        if q.get("explanation"):
+            st.info(q["explanation"])
+
+        if st.button("Next Question", key=f"next_{level}_{number}"):
+            st.session_state.question_number += 1
+            st.session_state.answered = False
+            st.rerun()
+
 
