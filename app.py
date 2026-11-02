@@ -138,7 +138,7 @@ else:
             q = questions[number]
 
             st.progress((number + 1) / len(questions))
-               st.subheader(q["question"])
+        
             answer = st.radio("Choose your answer:", q["answers"], key=f"answer_{level}_{number}")write(f"Question {number + 1} of {len(questions)}")
             
             if st.button(
