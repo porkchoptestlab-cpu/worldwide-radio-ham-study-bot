@@ -225,7 +225,17 @@ if st.session_state.get("selected_level") != level:
     st.session_state.question_number = 0
     st.session_state.score = 0
     st.session_state.answered = False
+st.sidebar.title("🏆 Student Scoreboard")
 
+player_name = st.sidebar.text_input("Enter your name")
+
+if "player_id" not in st.session_state:
+    st.session_state.player_id = str(uuid.uuid4())
+
+if player_name.strip():
+    st.sidebar.success(f"Welcome, {player_name}!")
+else:
+    st.sidebar.info("Enter your name to start.")
 quiz = questions[level]
 number = st.session_state.question_number
 
