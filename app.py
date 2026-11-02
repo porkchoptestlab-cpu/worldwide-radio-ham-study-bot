@@ -166,7 +166,7 @@ st.set_page_config(
 
 
 
-st.write("Welcome! Choose your license class and test your knowledge.")
+
 
 level = st.selectbox(
     "Choose your license:",
