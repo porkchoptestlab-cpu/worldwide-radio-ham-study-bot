@@ -285,8 +285,7 @@ else:
     st.write(f"Question {number + 1} of {len(quiz)}")
     st.subheader(q["question"])
 
-                answer = st.radio("Choose your answer:", q["answers"], key=f"answer_{level}_{number}")"Choose your answer:", q["answers"], key=f"answer_{level}_{number}")"Choose your answer:", q["answers"], key=f"answer_{level}_{number}")
-        "Choose your answer:",
+               
         q["answers"],
         key=f"answer_{level}_{number}"
     )
