@@ -143,60 +143,6 @@ else:
 
             answer = st.radio(
                 "Choose your answer:",
-                q["answers"],
-                key=f"answer_{level}_{q['id']}"
-            )
-
-            if st.button(
-                "Check Answer",
-                disabled=st.session_state.get("answered", False)
-            ):
-                st.session_state.answered = True
-
-                if answer == q["correct_answer"]:
-                    st.session_state.score += 1
-
-                st.rerun()
-
-            if st.session_state.get("answered", False):
-                if answer == q["correct_answer"]:
-                    st.success("Correct!")
-                else:
-                    st.error(
-                        "Incorrect. Correct answer: "
-                        + q["correct_answer"]
-                    )
-
-                st.info(q.get("explanation") or "Keep studying!")
-
-               
-            if st.button(
-                "Check Answer",
-                disabled=st.session_state.get("answered", False),
-                key=f"check_{level}_{q['id']}"
-            ):
-                st.session_state.answered = True
-
-                if answer == q["correct_answer"]:
-                    st.session_state.score += 1
-
-                    if player_name.strip():
-                        supabase.table("leaderboard").upsert(
-                            {
-                                "player_id": st.session_state.player_id,
-                                "display_name": player_name.strip(),
-                                "score": st.session_state.score
-                            },
-                            on_conflict="player_id"
-                        ).execute()
-
-                    st.success("Correct! You earned 1 point.")
-                else:
-                    st.error(
-                        "Not quite. The correct answer is: "
-                        + q["correct_answer"]
-                    )
-
                 
          
                
