@@ -158,20 +158,12 @@ st.caption("Worldwide Radio Ham Study Bot")
 
 import streamlit as st
 
-st.set_page_config(
-    page_title="Worldwide Radio Ham Study Bot",
-    page_icon="📻",
-    layout="centered"
-)
 
 
 
 
 
-level = st.selectbox(
-    "Choose your license:",
-    ["Technician", "General", "Amateur Extra"]
-)
+
 
 questions = {
     "Technician": [
