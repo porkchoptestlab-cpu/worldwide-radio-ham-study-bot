@@ -197,7 +197,12 @@ else:
                         + q["correct_answer"]
                     )
 
+                
                 st.info(q.get("explanation", ""))
+                 if st.button("Next Question"):
+                    st.session_state.question_number += 1
+                    st.session_state.answered = False
+                    st.rerun()
             
                     st.session_state.question_number += 1
                     st.session_state.answered = False
