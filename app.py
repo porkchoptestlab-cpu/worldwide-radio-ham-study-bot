@@ -141,7 +141,10 @@ else:
             st.write(f"Question {number + 1} of {len(questions)}")
             st.subheader(q["question"])
 
-            answer = st.radio(
+        File "/mount/src/worldwide-radio-ham-study-bot/app.py", line 144
+              answer = st.radio(
+                               ^
+SyntaxError: '(' was never closed
                 "Choose your answer:",
                 
          
