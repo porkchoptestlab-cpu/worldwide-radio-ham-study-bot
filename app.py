@@ -154,7 +154,7 @@ else:
             ):
                 st.session_state.answered = True
 
-                if answer == q["correct"]:
+                if answer == q["correct_answer"]:
                     st.session_state.score += 1
                     st.success("Correct!")
                 else:
