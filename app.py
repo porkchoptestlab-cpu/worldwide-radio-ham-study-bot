@@ -199,11 +199,12 @@ else:
 
                 
          
-                st.info(q.get("explanation", ""))
-    if st.button("Next Question"):
-    st.session_state.question_number += 1
-    st.session_state.answered = False
-    st.rerun()
+               st.info(q.get("explanation", ""))
+
+                if st.button("Next Question"):
+                    st.session_state.question_number += 1
+                    st.session_state.answered = False
+                    st.rerun()
             
 st.divider()
 st.caption("Worldwide Radio Ham Study Bot")
