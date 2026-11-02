@@ -169,7 +169,36 @@ else:
 
                 st.info(q.get("explanation") or "Keep studying!")
 
-                             if st.button(                 "Check Answer",                 disabled=st.session_state.get("answered", False),                 key=f"check_{level}_{q['id']}"             ):                 st.session_state.answered = True                  if answer == q["correct_answer"]:                     st.session_state.score += 1                      # Save the student's point in Supabase                     if player_name.strip():                         supabase.table("leaderboard").upsert({                             "player_id": st.session_state.player_id,                             "display_name": player_name.strip(),                             "score": st.session_state.score                         }, on_conflict="player_id").execute()                      st.success("Correct! You earned 1 point.")                 else:                     st.error(                         "Not quite. The correct answer is: "                         + q["correct_answer"]                     )                  st.info(q.get("explanation", ""))"Next Question"):
+               
+            if st.button(
+                "Check Answer",
+                disabled=st.session_state.get("answered", False),
+                key=f"check_{level}_{q['id']}"
+            ):
+                st.session_state.answered = True
+
+                if answer == q["correct_answer"]:
+                    st.session_state.score += 1
+
+                    if player_name.strip():
+                        supabase.table("leaderboard").upsert(
+                            {
+                                "player_id": st.session_state.player_id,
+                                "display_name": player_name.strip(),
+                                "score": st.session_state.score
+                            },
+                            on_conflict="player_id"
+                        ).execute()
+
+                    st.success("Correct! You earned 1 point.")
+                else:
+                    st.error(
+                        "Not quite. The correct answer is: "
+                        + q["correct_answer"]
+                    )
+
+                st.info(q.get("explanation", ""))
+            
                     st.session_state.question_number += 1
                     st.session_state.answered = False
                     st.rerun()
